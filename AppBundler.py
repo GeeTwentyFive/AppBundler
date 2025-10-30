@@ -19,7 +19,7 @@ with open(sys.argv[1], "rb") as target:
 
 target_file_name = Path(sys.argv[1]).stem
 
-with open("_TEMP.py", "w") as out:
+with open("OUT.py", "w") as out:
         out.write(
                 "import os\n" +
                 "from base64 import b64decode\n" +
@@ -39,7 +39,7 @@ with open("_TEMP.py", "w") as out:
         )
 
 PyInstaller.__main__.run([
-        "_TEMP.py",
+        "OUT.py",
         "--onefile",
         "--distpath", ".",
         "--clean"
@@ -47,7 +47,7 @@ PyInstaller.__main__.run([
 
 if os.path.isdir("build"):
         shutil.rmtree("build")
-if os.path.isfile("_TEMP.spec"):
-        os.remove("_TEMP.spec")
+if os.path.isfile("OUT.spec"):
+        os.remove("OUT.spec")
 
-os.remove("_TEMP.py")
+os.remove("OUT.py")
