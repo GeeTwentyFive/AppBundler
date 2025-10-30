@@ -4,6 +4,8 @@ from base64 import b64encode
 from tempfile import gettempdir
 import PyInstaller.__main__
 import os
+import os.path
+import shutil
 
 
 if len(sys.argv) < 3:
@@ -24,7 +26,7 @@ with open("_TEMP.py", "w") as out:
                 "from zipfile import ZipFile\n" +
                 "import subprocess\n" +
                 "DATA = '''" + target_file_data + "'''\n" +
-                "os.chdir(\"" + gettempdir() + "\")\n" + # COMMENTED OUT FOR TESTING
+                #"os.chdir(\"" + gettempdir() + "\")\n" + # COMMENTED OUT FOR TESTING
                 "with open(\"TEMP.zip\", \"wb\") as f:\n" +
                 "\tf.write(b64decode(DATA))\n" +
                 "os.makedirs(\"" + target_file_name + "\", exist_ok=True)\n" +
@@ -32,13 +34,20 @@ with open("_TEMP.py", "w") as out:
                 "\tz.extractall(\"" + target_file_name + "\")\n" +
                 "os.remove(\"TEMP.zip\")\n" +
                 "os.chdir(\"" + target_file_name + "\")\n" +
-                "subprocess.Popen(" + repr(sys.argv[2:]) + ", creationflags=0x8, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n" +
+                "subprocess.Popen(" + repr(sys.argv[2:]) + ", creationflags= 0x8 if os.name == \"nt\" else 0x0, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n" +
                 "exit()"
         )
 
 PyInstaller.__main__.run([
         "_TEMP.py",
-        "--onefile"
+        "--onefile",
+        "--distpath", ".",
+        "--clean"
 ])
+
+if os.path.isdir("build"):
+        shutil.rmtree("build")
+if os.path.isfile("_TEMP.spec"):
+        os.remove("_TEMP.spec")
 
 os.remove("_TEMP.py")
