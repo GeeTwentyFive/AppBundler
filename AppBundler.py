@@ -26,7 +26,7 @@ with open("_TEMP.py", "w") as out:
                 "from zipfile import ZipFile\n" +
                 "import subprocess\n" +
                 "DATA = '''" + target_file_data + "'''\n" +
-                #"os.chdir(\"" + gettempdir() + "\")\n" + # COMMENTED OUT FOR TESTING
+                "os.chdir(\"" + gettempdir() + "\")\n" +
                 "with open(\"TEMP.zip\", \"wb\") as f:\n" +
                 "\tf.write(b64decode(DATA))\n" +
                 "os.makedirs(\"" + target_file_name + "\", exist_ok=True)\n" +
