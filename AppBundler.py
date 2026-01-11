@@ -26,7 +26,7 @@ with open("OUT.py", "w") as out:
                 "from zipfile import ZipFile\n" +
                 "import subprocess\n" +
                 "DATA = '''" + target_file_data + "'''\n" +
-                "os.chdir(\"" + gettempdir() + "\")\n" +
+                "os.chdir(\"" + Path(gettempdir()).as_posix() + "\")\n" +
                 "with open(\"TEMP.zip\", \"wb\") as f:\n" +
                 "\tf.write(b64decode(DATA))\n" +
                 "os.makedirs(\"" + target_file_name + "\", exist_ok=True)\n" +
@@ -35,7 +35,7 @@ with open("OUT.py", "w") as out:
                 "os.remove(\"TEMP.zip\")\n" +
                 "os.chdir(\"" + target_file_name + "\")\n" +
                 "subprocess.Popen(" + repr(sys.argv[2:]) + ", creationflags= 0x8 if os.name == \"nt\" else 0x0, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n" +
-                "exit()"
+                "sys.exit()"
         )
 
 PyInstaller.__main__.run([
