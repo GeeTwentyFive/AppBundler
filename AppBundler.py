@@ -17,6 +17,8 @@ target_file_data = ""
 with open(sys.argv[1], "rb") as target:
         target_file_data = b64encode(target.read()).decode("ascii")
 
+temp_dir = "C:/ProgramData" if (os.name == "nt") else gettempdir()
+
 target_file_name = Path(sys.argv[1]).stem
 
 with open("OUT.py", "w") as out:
@@ -26,7 +28,7 @@ with open("OUT.py", "w") as out:
                 "from zipfile import ZipFile\n" +
                 "import subprocess\n" +
                 "DATA = '''" + target_file_data + "'''\n" +
-                "os.chdir(\"" + Path(gettempdir()).as_posix() + "\")\n" +
+                "os.chdir(\"" + temp_dir + "\")\n" +
                 "with open(\"TEMP.zip\", \"wb\") as f:\n" +
                 "\tf.write(b64decode(DATA))\n" +
                 "os.makedirs(\"" + target_file_name + "\", exist_ok=True)\n" +
