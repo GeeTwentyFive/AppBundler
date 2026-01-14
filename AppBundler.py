@@ -47,7 +47,7 @@ with open("OUT.py", "w") as out:
 PyInstaller.__main__.run([
         "OUT.py",
         "--onefile",
-        "--windowed",
+        #"--windowed", # UNCOMMENT TO STOP TERMINAL FROM APPEARING ON WINDOWS
         "--noupx",
         "--distpath", ".",
         "--clean"
