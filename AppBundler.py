@@ -11,36 +11,36 @@ RUN_PREFIX = "./" if (os.name != "nt") else ""
 
 
 if len(sys.argv) < 3:
-        print("USAGE: AppBundler <TARGET>.zip <PATH/TO/APP/WITHIN> [ARGS...]")
+        print("USAGE: AppBundler <PATH/TO/TARGET/DIR> <PATH/TO/APP/FROM/WITHIN> [ARGS...]")
         exit()
 
 sys.argv[2] = RUN_PREFIX + sys.argv[2]
 
+shutil.make_archive("_TEMP", "tar", sys.argv[1])
 target_file_data = ""
-with open(sys.argv[1], "rb") as target:
+with open("_TEMP.tar", "rb") as target:
         target_file_data = b64encode(target.read()).decode("ascii")
-
-target_file_name = Path(sys.argv[1]).stem
+os.remove("_TEMP.tar")
 
 with open("OUT.py", "w") as out:
         out.write(
                 "from tempfile import gettempdir\n"
                 "import os\n"
                 "from base64 import b64decode\n"
-                "from zipfile import ZipFile\n"
+                "from shutil import unpack_archive\n"
                 "import subprocess\n"
                 "import sys\n"
+
                 "DATA = '''" + target_file_data + "'''\n"
+
                 "os.chdir(gettempdir())\n"
-                "with open('TEMP.zip', 'wb') as f:\n"
+                "with open('TEMP.tar', 'wb') as f:\n"
                 "\tf.write(b64decode(DATA))\n"
-                "os.makedirs('" + target_file_name + "', exist_ok=True)\n"
-                "with ZipFile('TEMP.zip', 'r') as z:\n"
-                "\tz.extractall('" + target_file_name + "')\n"
-                "os.remove('TEMP.zip')\n"
-                "os.chdir('" + target_file_name + "')\n"
+                "unpack_archive('TEMP.tar')\n"
+                "os.remove('TEMP.tar')\n"
                 "if os.name != 'nt': os.chmod('" + sys.argv[2] + "', 0o777)\n"
                 "subprocess.Popen(" + repr(sys.argv[2:]) + ")\n"
+                
                 "sys.exit()\n"
         )
 
