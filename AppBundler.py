@@ -5,6 +5,7 @@ import PyInstaller.__main__
 import os
 import os.path
 import shutil
+from hashlib import sha3_224
 
 
 RUN_PREFIX = "./" if (os.name != "nt") else ""
@@ -22,6 +23,8 @@ with open("_TEMP.tar", "rb") as target:
         target_file_data = b64encode(target.read()).decode("ascii")
 os.remove("_TEMP.tar")
 
+output_dir_name = sha3_224(target_file_data.encode()).hexdigest()
+
 with open("OUT.py", "w") as out:
         out.write(
                 "from tempfile import gettempdir\n"
@@ -33,11 +36,15 @@ with open("OUT.py", "w") as out:
 
                 "DATA = '''" + target_file_data + "'''\n"
 
-                "os.chdir(gettempdir())\n"
-                "with open('TEMP.tar', 'wb') as f:\n"
-                "\tf.write(b64decode(DATA))\n"
-                "unpack_archive('TEMP.tar')\n"
-                "os.remove('TEMP.tar')\n"
+                "output_path = os.path.join(gettempdir(), '" + output_dir_name + "')\n"
+                "if not os.path.isdir(output_path):\n"
+                "\tos.mkdir(output_path)\n"
+                "\tos.chdir(output_path)\n"
+                "\twith open('TEMP.tar', 'wb') as f:\n"
+                "\t\tf.write(b64decode(DATA))\n"
+                "\tunpack_archive('TEMP.tar')\n"
+                "\tos.remove('TEMP.tar')\n"
+                "else: os.chdir(output_path)\n"
                 "if os.name != 'nt': os.chmod('" + sys.argv[2] + "', 0o777)\n"
                 "subprocess.Popen(" + repr(sys.argv[2:]) + ")\n"
                 
