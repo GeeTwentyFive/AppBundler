@@ -19,12 +19,12 @@
 char temp[1024];
 
 
-int DirectoryExists(const char* path) {
+static inline int DirectoryExists(const char* path) {
         struct stat info;
         return (stat(path, &info) == 0) && S_ISDIR(info.st_mode);
 }
 
-int FileExists(const char* path) {
+static inline int FileExists(const char* path) {
         struct stat info;
         return (stat(path, &info) == 0) && S_ISREG(info.st_mode);
 }
@@ -103,9 +103,9 @@ int main(int argc, const char* argv[]) {
 
         // TODO: Write:
         // - payload
-        // - payload's payload 128-char hex string (target_file_data_hash_hex)
         // - payload's payload
         // - payload's payload size (64-bit int)
+        // - payload's payload 128-char hex string (target_file_data_hash_hex)
         // - argv2
         // - argv2_size (64-bit int)
         // - extra args (data + len (64-bit int))
