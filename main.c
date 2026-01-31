@@ -1,9 +1,19 @@
+#define _FILE_OFFSET_BITS 64
+#define _LARGEFILE_SOURCE
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#ifdef _WIN32
+#define fseek64 _fseeki64
+#define ftell64 _ftelli64
+#else
+#define fseek64 fseeko
+#define ftell64 ftello
+#endif
 
 
 char temp[1024];
@@ -57,12 +67,12 @@ int main(int argc, const char* argv[]) {
                 return 1;
         }
 
-        if (fseek(target_file, 0, SEEK_END) != 0) {
+        if (fseek64(target_file, 0, SEEK_END) != 0) {
                 puts("ERROR: Failed to seek to end of _TEMP.tar");
                 return 1;
         }
-        long target_file_size = ftell(target_file);
-        if (fseek(target_file, 0, SEEK_SET) != 0) {
+        long target_file_size = ftell64(target_file);
+        if (fseek64(target_file, 0, SEEK_SET) != 0) {
                 puts("ERROR: Failed to seek to beginning of _TEMP.tar");
                 return 1;
         }
@@ -91,9 +101,11 @@ int main(int argc, const char* argv[]) {
         }
         free(_target_file_data_hash);
 
-        puts(target_file_data_hash_hex); // TEMP; TEST
-
-        // TODO
+        // TODO: Write:
+        // - payload
+        // - payload's payload
+        // - payload's payload size (64-bit int)
+        // - payload's payload 128-char hex string (target_file_data_hash_hex)
 
         free(target_file_data_hash_hex);
 
