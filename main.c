@@ -103,9 +103,13 @@ int main(int argc, const char* argv[]) {
 
         // TODO: Write:
         // - payload
+        // - payload's payload 128-char hex string (target_file_data_hash_hex)
         // - payload's payload
         // - payload's payload size (64-bit int)
-        // - payload's payload 128-char hex string (target_file_data_hash_hex)
+        // - argv2
+        // - argv2_size (64-bit int)
+        // - extra args (data + len (64-bit int))
+        // - extra args count (64-bit int)
 
         free(target_file_data_hash_hex);
 
