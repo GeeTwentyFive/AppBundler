@@ -57,23 +57,23 @@ int main(int argc, const char* argv[]) {
                 return 1;
         }
 
-        strcpy(temp, "tar cf _TEMP.tar ");
+        strcpy(temp, "tar czf _TEMP.tar.gz ");
         strcat(temp, argv[1]);
         system(temp);
 
-        FILE* target_file = fopen("_TEMP.tar", "rb");
+        FILE* target_file = fopen("_TEMP.tar.gz", "rb");
         if (!target_file) {
-                puts("ERROR: Failed to open _TEMP.tar");
+                puts("ERROR: Failed to open _TEMP.tar.gz");
                 return 1;
         }
 
         if (fseek64(target_file, 0, SEEK_END) != 0) {
-                puts("ERROR: Failed to seek to end of _TEMP.tar");
+                puts("ERROR: Failed to seek to end of _TEMP.tar.gz");
                 return 1;
         }
         long target_file_size = ftell64(target_file);
         if (fseek64(target_file, 0, SEEK_SET) != 0) {
-                puts("ERROR: Failed to seek to beginning of _TEMP.tar");
+                puts("ERROR: Failed to seek to beginning of _TEMP.tar.gz");
                 return 1;
         }
 
@@ -84,11 +84,12 @@ int main(int argc, const char* argv[]) {
         }
 
         if (fread(target_file_data, 1, target_file_size, target_file) < target_file_size) {
-                puts("ERROR: Failed to read data from _TEMP.tar");
+                puts("ERROR: Failed to read data from _TEMP.tar.gz");
                 return 1;
         }
 
-        system("rm _TEMP.tar");
+        fclose(target_file);
+        system("rm _TEMP.tar.gz");
 
         unsigned char* _target_file_data_hash = XORHash(target_file_data, target_file_size);
         unsigned char* target_file_data_hash_hex = calloc(XOR_HASH_LEN*2 + 1, 1);
@@ -101,15 +102,13 @@ int main(int argc, const char* argv[]) {
         }
         free(_target_file_data_hash);
 
-        // TODO: Write:
+        // TODO: Write (INCLUDING NULL TERMINATORS):
         // - payload
         // - payload's payload
-        // - payload's payload size (64-bit int)
+        // - payload's payload size (64-bit uint)
         // - payload's payload 128-char hex string (target_file_data_hash_hex)
-        // - argv2
-        // - argv2_size (64-bit int)
-        // - extra args (data + len (64-bit int))
-        // - extra args count (64-bit int)
+        // - args (data + len (32-bit int))
+        // - args count (32-bit int)
 
         free(target_file_data_hash_hex);
 
