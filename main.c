@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #ifdef _WIN32
 #define fseek64 _fseeki64
@@ -13,6 +14,12 @@
 #else
 #define fseek64 fseeko
 #define ftell64 ftello
+#endif
+
+#ifdef _WIN32
+#include "WINDOWS_PAYLOAD.h"
+#else
+#include "LINUX_PAYLOAD.h"
 #endif
 
 
@@ -102,15 +109,30 @@ int main(int argc, const char* argv[]) {
         }
         free(_target_file_data_hash);
 
-        // TODO: Write (INCLUDING NULL TERMINATORS):
-        // - payload
-        // - payload's payload
-        // - payload's payload size (64-bit uint)
-        // - payload's payload 128-char hex string (target_file_data_hash_hex)
-        // - args (data + len (32-bit int))
-        // - args count (32-bit int)
+        FILE* out = fopen(
+                "OUT"
+                #ifdef _WIN32
+                        ".exe"
+                #endif
+                ,
+                "w"
+        );
+
+        fwrite(PAYLOAD, 1, PAYLOAD_len, out);
+        fwrite(target_file_data, 1, target_file_size, out);
+        fwrite(&target_file_size, sizeof(uint64_t), 1, out);
+        fwrite(target_file_data_hash_hex, sizeof(char), strlen(target_file_data_hash_hex)+1, out);
+        uint32_t args_count = argc-1;
+        // TODO: Write (INCLUDING NULL TERMINATORS): args (data + len (32-bit int))
+        fwrite(&args_count, sizeof(uint32_t), 1, out);
+
+        fclose(out);
 
         free(target_file_data_hash_hex);
+
+        #ifndef _WIN32
+                chmod("OUT", 0755);
+        #endif
 
         return 0;
 }
