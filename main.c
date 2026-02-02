@@ -122,8 +122,12 @@ int main(int argc, const char* argv[]) {
         fwrite(target_file_data, 1, target_file_size, out);
         fwrite(&target_file_size, sizeof(uint64_t), 1, out);
         fwrite(target_file_data_hash_hex, sizeof(char), strlen(target_file_data_hash_hex)+1, out);
+        for (int i = 1; i < argc; i++) {
+                size_t arg_len = strlen(argv[i])+1;
+                fwrite(argv[i], sizeof(char), arg_len, out);
+                fwrite(&arg_len, sizeof(int32_t), 1, out);
+        }
         uint32_t args_count = argc-1;
-        // TODO: Write (INCLUDING NULL TERMINATORS): args (data + len (32-bit int))
         fwrite(&args_count, sizeof(uint32_t), 1, out);
 
         fclose(out);
