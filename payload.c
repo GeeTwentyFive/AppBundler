@@ -37,11 +37,11 @@ int main(int argc, const char* argv[]) {
                 puts("ERROR: Failed to open self executable for reading");
                 return 1;
         }
-        fseek64(f, -1, SEEK_END);
+        fseek64(f, 0, SEEK_END);
 
-        fseek64(f, -sizeof(int32_t), SEEK_CUR);
-        int32_t args_count;
-        fread(&args_count, sizeof(int32_t), 1, f);
+        fseek64(f, -sizeof(uint32_t), SEEK_CUR);
+        uint32_t args_count;
+        fread(&args_count, sizeof(uint32_t), 1, f);
 
         int total_args_len = 0;
         char** args = calloc(args_count, sizeof(char*));
@@ -87,7 +87,11 @@ int main(int argc, const char* argv[]) {
         }
 
         if (!DirectoryExists(hash)) {
-                if (mkdir(hash, 0755) != 0) {
+                if (mkdir(hash
+                #ifndef _WIN32
+                        , 0755
+                #endif
+                ) != 0) {
                         puts("ERROR: Failed to create output dir for app");
                         return 1;
                 }
@@ -100,13 +104,14 @@ int main(int argc, const char* argv[]) {
                 fseek64(f, -sizeof(uint64_t), SEEK_CUR);
                 fread(&payload_len, sizeof(uint64_t), 1, f);
 
-                FILE* out = fopen("_TEMP.tar.gz", "w");
+                FILE* out = fopen("_TEMP.tar.gz", "wb");
                 if (!out) {
                         puts("ERROR: Failed to create temp program output file");
                         return 1;
                 }
                 fseek64(f, -payload_len, SEEK_CUR);
-                for (int i = 0; i < payload_len; i++) fputc(fgetc(f), out);
+                for (int i = 0; i < payload_len; i++) fputc(fgetc(f), out); // TODO: Fix...?
+                fclose(out);
 
                 system("tar xf _TEMP.tar.gz");
                 system("rm _TEMP.tar.gz");
@@ -128,7 +133,7 @@ int main(int argc, const char* argv[]) {
                 strcat(run_cmd, " ");
         }
         //system(run_cmd);
-        puts(run_cmd); // TEMP; TEST
+        puts(run_cmd); // TODO: FIX
 
         return 0;
 }
